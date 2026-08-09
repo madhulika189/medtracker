@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Medication Grid</title>
+<link rel="manifest" href="./manifest.json" />
+<meta name="theme-color" content="#1B1D2A" />
+<link rel="apple-touch-icon" href="./icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<style>
+  html, body { margin: 0; padding: 0; background: #16181F; }
+  * { box-sizing: border-box; }
+</style>
+
+<!-- Your Google OAuth Client ID (safe to be public — this is meant to be embedded in front-end code) -->
+<script>
+  window.GOOGLE_CLIENT_ID = "30046718492-7cma6tfafjdhkmvrjpd9aubbn2svi8co.apps.googleusercontent.com";
+</script>
+
+<!-- localStorage-backed polyfill matching the storage interface the app expects -->
+<script>
+  window.storage = {
+    async get(key) {
+      const v = localStorage.getItem(key);
+      if (v === null) throw new Error("not found");
+      return { key, value: v };
+    },
+    async set(key, value) {
+      localStorage.setItem(key, value);
+      return { key, value };
+    },
+    async delete(key) {
+      localStorage.removeItem(key);
+      return { key, deleted: true };
+    },
+    async list(prefix) {
+      const keys = Object.keys(localStorage).filter((k) => !prefix || k.startsWith(prefix));
+      return { keys };
+    },
+  };
+</script>
+
+<!-- React (no build step needed — Babel below compiles the JSX in your browser) -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
+
+<!-- Google Identity Services, for the optional Drive backup -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react" src="./app.js"></script>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
